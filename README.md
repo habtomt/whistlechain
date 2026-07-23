@@ -1,4 +1,4 @@
-tested Hardhat + Solidity + plain-JS/ethers.js implementation.
+Hardhat + Solidity + plain-JS/ethers.js implementation.
 
 ## 1. required clarifications
 
