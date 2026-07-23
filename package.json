@@ -1,0 +1,24 @@
+{
+  "name": "whistlechain",
+  "version": "1.0.0",
+  "description": "WhistleChain - a decentralized whistleblower reward and DAO-lite verification platform (university blockchain course demo).",
+  "main": "hardhat.config.js",
+  "scripts": {
+    "compile": "hardhat compile",
+    "test": "hardhat test",
+    "node": "hardhat node",
+    "deploy:local": "hardhat run scripts/deploy.js --network localhost",
+    "deploy:uzh": "hardhat run scripts/deploy.js --network uzh",
+    "frontend": "npx --yes serve frontend -l 5173"
+  },
+  "keywords": ["blockchain", "whistleblower", "dao", "ethereum", "solidity"],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^5.0.0",
+    "@openzeppelin/contracts": "^5.6.1",
+    "dotenv": "^17.4.2",
+    "hardhat": "^2.29.0",
+    "solc": "^0.8.24"
+  }
+}

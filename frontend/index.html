@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>WhistleChain — Demo</title>
+<link rel="stylesheet" href="style.css" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.13.2/ethers.umd.min.js"></script>
+</head>
+<body>
+<header>
+  <h1>WhistleChain</h1>
+  <p class="subtitle">Decentralized anonymous whistleblower reward system</p>
+  <div id="walletBar">
+    <span id="networkBadge">not connected</span>
+    <button id="connectBtn">Connect Wallet</button>
+    <button id="generateWalletBtn">Generate Fresh Wallet</button>
+    <button id="addNetworkBtn">Add UZH_ETH_PoS to MetaMask</button>
+  </div>
+  <p class="privacy-note">
+    <strong>Privacy note:</strong> a wallet address is <em>pseudonymous</em>. It is not linked on-chain to 
+    your real identity, but wallet addresses, transaction history, transaction timing and other metadata 
+    may be used to establish such links. WhistleChain minimizes on-chain data exposure and supports 
+    privacy-preserving reporting.
+  </p>
+</header>
+
+<nav id="tabs">
+  <button class="tab-btn active" data-tab="whistleblower">Whistleblower</button>
+  <button class="tab-btn" data-tab="validator">Validator</button>
+  <button class="tab-btn" data-tab="treasury">Treasury &amp; Governance</button>
+</nav>
+
+<main>
+  <!-- ============================= WHISTLEBLOWER ============================= -->
+  <section id="tab-whistleblower" class="tab-panel active">
+    <h2>Submit an Anonymous Report</h2>
+    <form id="reportForm">
+      <label>Title
+        <input type="text" id="rTitle" required maxlength="120" placeholder="Short report title" />
+      </label>
+      <label>Category
+        <select id="rCategory">
+          <option>Corruption</option>
+          <option>Fraud</option>
+          <option>Safety Violation</option>
+          <option>Other</option>
+        </select>
+      </label>
+      <label>Report Description
+        <textarea id="rDescription" required rows="8" placeholder="Describe the wrongdoing in as much detail as possible..."></textarea>
+      </label>
+      <label>Reward Wallet Address
+        <input type="text" id="rWallet" required placeholder="0x..." />
+      </label>
+      <label>Stake Amount (UZHETHs, minimum 50)
+        <input type="number" id="rStake" min="50" value="50" required />
+      </label>
+      <button type="submit">1. Approve Stake &amp; 2. Submit Report</button>
+    </form>
+    <div id="submitStatus" class="status-box"></div>
+  </section>
+
+  <!-- ============================= VALIDATOR ============================= -->
+  <section id="tab-validator" class="tab-panel">
+    <h2>Validator Panel</h2>
+    <p>Validator admission is fully self-service: you can join by paying a
+    one-time <strong>20 UZHETHs</strong> fee. As a new
+    validator you start at the same baseline reputation (100) and goes through a
+    short <strong>probation period</strong>: your first 5 votes (across any
+    reports) count at a ramped share of your voting power, starting at 20%
+    and rising to 100% by your 6th vote.</p>
+
+    <div class="card">
+      <h3>Join as a Validator</h3>
+      <p class="small">Requires 20 UZHETHs and a small amount of gas. Applies to the currently connected wallet.</p>
+      <button id="joinValidatorBtn">Approve 20 UZHETHs &amp; Join as Validator</button>
+      <div id="joinValidatorStatus" class="status-box"></div>
+    </div>
+
+    <div class="row">
+      <button id="refreshReportsBtn">Refresh Report List</button>
+      <span id="myReputation"></span>
+    </div>
+    <div id="reportList"></div>
+
+    <div id="decryptPanel" class="card" style="display:none">
+      <h3>Review &amp; Decrypt Report #<span id="decryptReportId"></span></h3>
+      <p class="small">Paste the decryption key the whistleblower shared with the review committee
+      out-of-band (not via the blockchain).</p>
+      <input type="text" id="decryptKeyInput" placeholder="Base64 AES-256-GCM key" />
+      <button id="decryptBtn">Decrypt &amp; Review</button>
+      <pre id="decryptedContent"></pre>
+      <div class="row">
+        <button id="voteApproveBtn" class="approve">Vote: Approve</button>
+        <button id="voteRejectBtn" class="reject">Vote: Reject</button>
+        <button id="finalizeBtn">Finalize (after voting period ends)</button>
+      </div>
+      <div id="voteStatus" class="status-box"></div>
+    </div>
+  </section>
+
+  <!-- ============================= TREASURY / GOVERNANCE ============================= -->
+  <section id="tab-treasury" class="tab-panel">
+    <h2>Treasury &amp; Governance</h2>
+    <div class="card">
+      <h3>Treasury</h3>
+      <p>Balance: <span id="treasuryBalance">-</span> UZHETHs</p>
+      <p>Total donated: <span id="totalDonated">-</span> UZHETHs</p>
+      <p>Total forfeited stakes: <span id="totalForfeited">-</span> UZHETHs</p>
+      <p>Total paid out: <span id="totalPaidOut">-</span> UZHETHs</p>
+      <label>Donate to reward pool (UZHETHs)
+        <input type="number" id="donateAmount" min="1" value="100" />
+      </label>
+      <button id="donateBtn">Donate</button>
+      <div id="donateStatus" class="status-box"></div>
+    </div>
+    <div class="card">
+      <h3>Governance Parameters</h3>
+      <ul>
+        <li>Quorum: 40% of total eligible reputation weight</li>
+        <li>Approval threshold: 66.6% (2/3 supermajority) of participating weight</li>
+        <li>Voting period: 4 days</li>
+        <li>Reputation earn (consensus-aligned vote): +5</li>
+        <li>Reputation slash (against consensus): -10</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3>Validators</h3>
+      <div id="validatorInfo"></div>
+    </div>
+    <div class="card">
+      <h3>Report Outcomes</h3>
+      <div id="outcomesList"></div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <p>WhistleChain - Privacy-Preserving Reporting on UZH Ethereum.</p>
+</footer>
+
+<script src="crypto.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
